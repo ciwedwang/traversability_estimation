@@ -16,7 +16,7 @@
 #include <ros/package.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PolygonStamped.h>
-#include <xmlrpcpp/XmlRpcValue.h>
+#include <XmlRpcValue.h>
 
 // kindr
 #include <kindr/Core>
