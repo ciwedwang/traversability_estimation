@@ -1,6 +1,6 @@
 # Footprint path to check.
 traversability_msgs/FootprintPath[] path
-
+ 
 ---
 
 # Traversability results

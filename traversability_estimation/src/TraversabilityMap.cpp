@@ -226,6 +226,7 @@ bool TraversabilityMap::computeTraversability()
   return true;
 }
 
+// 根据foot print 的形状, 计算机器人在旋转一定角度(footprintYaw)之后的tranversability map 并 publish
 bool TraversabilityMap::traversabilityFootprint(double footprintYaw)
 {
   if (!traversabilityMapInitialized_) return false;
@@ -233,6 +234,8 @@ bool TraversabilityMap::traversabilityFootprint(double footprintYaw)
   // Initialize timer.
   ros::WallTime start = ros::WallTime::now();
 
+  //traversability_x 指机器人非旋转情况下的traversabvvility
+  //traversability_rot 指机器人旋转一定yaw值的情况下的traversabvvility
   traversabilityMap_.add("traversability_x");
   traversabilityMap_.add("traversability_rot");
 
@@ -245,7 +248,7 @@ bool TraversabilityMap::traversabilityFootprint(double footprintYaw)
   kindr::AngleAxisD rotationAxis(footprintYaw, 0.0,
                                  0.0, 1.0);
   rquat = rotationAxis * xquat;
-  Eigen::Quaterniond orientationX = xquat.toImplementation();
+  Eigen::Quaterniond orientationX = xquat.toImplementation(); //to eigen type
   Eigen::Quaterniond orientationRot = rquat.toImplementation();
 
   for (grid_map::GridMapIterator iterator(traversabilityMap_); !iterator.isPastEnd(); ++iterator) {
@@ -260,7 +263,7 @@ bool TraversabilityMap::traversabilityFootprint(double footprintYaw)
     toPosition.x() = position.x();
     toPosition.y() = position.y();
     toPosition.z() = 0.0;
-
+    //根据footPrint的形状和方向, 计算其在grid map某个位置时所占据的polygon区域.
     for (const auto& point : footprintPoints_) {
       positionToVertex.x() = point.x;
       positionToVertex.y() = point.y;
@@ -487,6 +490,8 @@ bool TraversabilityMap::checkFootprintPath(
   return true;
 }
 
+//在grid map的一个polygon范围内计算traversability值.
+//如果判断为non-traversability, 则 return false. 否则, 计算traversability value(平均值)
 bool TraversabilityMap::isTraversable(grid_map::Polygon& polygon, double& traversability)
 {
   unsigned int nCells = 0;
@@ -526,6 +531,7 @@ bool TraversabilityMap::isTraversable(grid_map::Polygon& polygon, double& traver
   return true;
 }
 
+//判断以center为圆心, 半径在radiusMin 和 radiusMax 之间的环形区域的traversability value, 并进行set
 bool TraversabilityMap::isTraversable(const grid_map::Position& center, const double& radiusMax, double& traversability, const double& radiusMin)
 {
   // Handle cases of footprints outside of map.
@@ -666,7 +672,8 @@ bool TraversabilityMap::checkForStep(const grid_map::Index& indexStep)
       double height = traversabilityMap_.at("elevation", indexStep);
       for (grid_map::CircleIterator circleIterator(traversabilityMap_, center, windowRadiusStep);
           !circleIterator.isPastEnd(); ++circleIterator) {
-        if (traversabilityMap_.at("elevation", *circleIterator) > criticalStepHeight_ + height && traversabilityMap_.at(stepType_, *circleIterator) == 0.0) indices.push_back(*circleIterator);
+        if (traversabilityMap_.at("elevation", *circleIterator) > criticalStepHeight_ + height && traversabilityMap_.at(stepType_, *circleIterator) == 0.0) 
+          indices.push_back(*circleIterator);
       }
       if (indices.empty()) indices.push_back(indexStep);
       for (auto& index : indices) {
@@ -724,10 +731,14 @@ bool TraversabilityMap::checkForStep(const grid_map::Index& indexStep)
   return true;
 }
 
+//根据slope value 判断 traversability value, 并更新slope traversability value
+//若该点已经有slope value, 则若其值为0.0, 则返回false.
+//若该点没有slope value: 判断依据为在index周围 3*resolution大小的范围内判断斜度信息为0的grid的数目, 若大于 nSlopesCritical 个, 则为non-traversability.
+//nSlopesCritical的计算方法?
 bool TraversabilityMap::checkForSlope(const grid_map::Index& index)
 {
   if (traversabilityMap_.at(slopeType_, index) == 0.0) {
-    if (!traversabilityMap_.isValid(index, "slope_footprint")) {
+    if (!traversabilityMap_.isValid(index, "slope_footprint")) {   //isValid: Checks if cell at index is a valid (finite) for a certain layer.
       double windowRadius = 3.0*traversabilityMap_.getResolution(); // TODO: read this as a parameter?
       double criticalLength = maxGapWidth_ / 3.0;
       int nSlopesCritical = floor(2 * windowRadius * criticalLength / pow(traversabilityMap_.getResolution(), 2));

@@ -244,6 +244,7 @@ bool TraversabilityEstimation::updateParameter(std_srvs::Empty::Request&, std_sr
   return true;
 }
 
+//先读取tf,得到robot的位置, 然后调用submapService 获得一个以机器人位置为中心的elevation map.
 bool TraversabilityEstimation::requestElevationMap(grid_map_msgs::GridMap& map)
 {
   submapPoint_.header.stamp = ros::Time(0);
@@ -302,6 +303,7 @@ bool TraversabilityEstimation::checkFootprintPath(
   return true;
 }
 
+//根据service的参数,获取traversability 的　一个submap
 bool TraversabilityEstimation::getTraversabilityMap(
     grid_map_msgs::GetGridMap::Request& request,
     grid_map_msgs::GetGridMap::Response& response)
