@@ -1,0 +1,27 @@
+<launch>
+  <!-- TF -->
+   <node pkg="tf2_ros" type="static_transform_publisher" respawn="true" name="laser_tf" args="0.35     0 1.255 -0.01 0.125 0.005 base_link rslidar" />
+
+  <!-- elevation mapping -->
+  <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen">
+    <rosparam command="load" file="$(find elevation_mapping_demos)/config/robots/simple_demo_robot.yaml" />
+    <rosparam command="load" file="$(find elevation_mapping_demos)/config/elevation_maps/simple_demo_map.yaml" />
+    <rosparam command="load" file="$(find elevation_mapping)/config/sensor_processors/rslidar_16.yaml" />
+  </node>
+
+  <!-- traversability estimation -->
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find traversability_estimation)/config/rosconsole.conf"/>
+  <node pkg="traversability_estimation" type="traversability_estimation_node" name="traversability_estimation" output="screen">
+    <rosparam command="load" file="$(find traversability_estimation)/config/my_robot.yaml"/>
+    <rosparam command="load" file="$(find traversability_estimation)/config/my_robot_footprint_parameter.yaml"/>
+    <rosparam command="load" file="$(find traversability_estimation)/config/my_robot_filter_parameter.yaml"/>
+  </node>
+
+  <!-- visualization -->
+   <node pkg="grid_map_visualization" type="grid_map_visualization" name="traversability_map_visualization" output="screen">
+   	<rosparam command="load" file="$(find traversability_estimation)/config/visualization/my_traversability.yaml"/>
+  </node>
+  
+  <!-- rviz -->
+  <node name = "traversability_map_rviz" pkg="rviz" type="rviz" args="-d $(find traversability_estimation)/rviz/visualization.rviz" />
+</launch>
