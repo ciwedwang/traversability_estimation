@@ -132,6 +132,12 @@ class TraversabilityEstimation
    */
   void gridMapToInitTraversabilityMapCallback(const grid_map_msgs::GridMap& message);
 
+  /*!
+   * Callback to receive a grid map message that is used to update the traversability map.
+   * @param message grid map message to be used to update the traversability map.
+   */
+  void gridMapToUpdateTraversabilityMapCallback(const grid_map_msgs::GridMap& message);
+
  private:
 
   /*!
@@ -195,6 +201,11 @@ class TraversabilityEstimation
   ros::Subscriber gridMapToInitTraversabilityMapSubscriber_;
   std::string gridMapToInitTraversabilityMapTopic_;
   bool acceptGridMapToInitTraversabilityMap_;
+
+  //! Grid Map topic to update traversability map.
+  ros::Subscriber gridMapToUpdateTraversabilityMapSubscriber_;
+  std::string gridMapToUpdateTraversabilityMapTopic_;
+  bool acceptGridMapToUpdateTraversabilityMap_;
 
   //! Elevation map service client.
   ros::ServiceClient submapClient_;

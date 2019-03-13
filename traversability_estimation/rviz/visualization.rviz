@@ -9,9 +9,6 @@ Panels:
         - /GridMap1
         - /GridMap2
         - /TF1/Tree1
-        - /TF1/Tree1/world1
-        - /TF1/Tree1/world1/base_odom1
-        - /TF1/Tree1/world1/base_odom1/base_link1
       Splitter Ratio: 0.625397
     Tree Height: 775
   - Class: rviz/Selection
@@ -32,7 +29,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -175,49 +172,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_laser_2:
-          Value: true
         base_link:
           Value: true
-        base_odom:
-          Value: true
-        camera_link:
-          Value: true
-        camera_link2:
-          Value: true
-        protector0:
-          Value: true
-        protector1:
-          Value: true
-        protector2:
-          Value: true
-        protector3:
-          Value: true
-        protector4:
-          Value: true
-        protector5:
-          Value: true
         rslidar:
-          Value: true
-        steering_link:
-          Value: true
-        ultrasonic0:
-          Value: true
-        ultrasonic1:
-          Value: true
-        ultrasonic2:
-          Value: true
-        ultrasonic3:
-          Value: true
-        ultrasonic4:
-          Value: true
-        ultrasonic5:
-          Value: true
-        ultrasonic6:
-          Value: true
-        ultrasonic7:
-          Value: true
-        world:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -225,46 +182,7 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          base_odom:
-            base_link:
-              camera_link:
-                {}
-              camera_link2:
-                {}
-              protector4:
-                {}
-              protector5:
-                {}
-              rslidar:
-                {}
-              steering_link:
-                base_laser_2:
-                  {}
-                protector0:
-                  {}
-                protector1:
-                  {}
-                protector2:
-                  {}
-                protector3:
-                  {}
-                ultrasonic6:
-                  {}
-                ultrasonic7:
-                  {}
-              ultrasonic0:
-                {}
-              ultrasonic1:
-                {}
-              ultrasonic2:
-                {}
-              ultrasonic3:
-                {}
-              ultrasonic4:
-                {}
-              ultrasonic5:
-                {}
+        {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -324,5 +242,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1855
-  X: 1985
+  X: 65
   Y: 24

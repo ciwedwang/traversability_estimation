@@ -21,6 +21,7 @@ namespace traversability_estimation {
 TraversabilityEstimation::TraversabilityEstimation(ros::NodeHandle& nodeHandle)
     : nodeHandle_(nodeHandle),
       acceptGridMapToInitTraversabilityMap_(false),
+      acceptGridMapToUpdateTraversabilityMap_(false),
       traversabilityMap_(nodeHandle),
       traversabilityType_("traversability"),
       slopeType_("traversability_slope"),
@@ -33,12 +34,14 @@ TraversabilityEstimation::TraversabilityEstimation(ros::NodeHandle& nodeHandle)
   readParameters();
   submapClient_ = nodeHandle_.serviceClient<grid_map_msgs::GetGridMap>(submapServiceName_);
 
+  /** close the update trimmer, because it only get a submap of elevation map, we want the whole map **/
+  /*
   if (!updateDuration_.isZero()) {
     updateTimer_ = nodeHandle_.createTimer(
         updateDuration_, &TraversabilityEstimation::updateTimerCallback, this);
   } else {
     ROS_WARN("Update rate is zero. No traversability map will be published.");
-  }
+  }*/
 
   loadElevationMapService_ = nodeHandle_.advertiseService("load_elevation_map", &TraversabilityEstimation::loadElevationMap, this);
   updateTraversabilityService_ = nodeHandle_.advertiseService("update_traversability", &TraversabilityEstimation::updateServiceCallback, this);
@@ -55,6 +58,15 @@ TraversabilityEstimation::TraversabilityEstimation(ros::NodeHandle& nodeHandle)
                               1,
                               &TraversabilityEstimation::gridMapToInitTraversabilityMapCallback,
                               this);
+  }
+
+  //Use the callback of elevation subscriber to get the whole map"
+  if(acceptGridMapToUpdateTraversabilityMap_){
+    gridMapToUpdateTraversabilityMapSubscriber_ =
+        nodeHandle_.subscribe(gridMapToUpdateTraversabilityMapTopic_,
+                              1,
+                              &TraversabilityEstimation::gridMapToUpdateTraversabilityMapCallback,
+                              this);      
   }
 
   elevationMapLayers_.push_back("elevation");
@@ -109,6 +121,11 @@ bool TraversabilityEstimation::readParameters()
   acceptGridMapToInitTraversabilityMap_ = param_io::param<bool>(nodeHandle_, "grid_map_to_initialize_traversability_map/enable", false);
   gridMapToInitTraversabilityMapTopic_ =
       param_io::param<std::string>(nodeHandle_, "grid_map_to_initialize_traversability_map/grid_map_topic_name", "initial_elevation_map");
+
+  // Grid map to initialize elevation layer
+  acceptGridMapToUpdateTraversabilityMap_ = param_io::param<bool>(nodeHandle_, "grid_map_to_update_traversability_map/enable", false);
+  gridMapToUpdateTraversabilityMapTopic_ =
+      param_io::param<std::string>(nodeHandle_, "grid_map_to_update_traversability_map/grid_map_topic_name", "initial_elevation_map");
 
   return true;
 }
@@ -386,6 +403,18 @@ void TraversabilityEstimation::gridMapToInitTraversabilityMapCallback(const grid
     ROS_INFO("[TraversabilityEstimation::gridMapToInitTraversabilityMapCallback]: "
              "Traversability Map initialized using received grid map on topic '%s'.", gridMapToInitTraversabilityMapTopic_.c_str());
   }
+}
+
+void TraversabilityEstimation::gridMapToUpdateTraversabilityMapCallback(const grid_map_msgs::GridMap& message)
+{
+  grid_map::GridMap elevationMap;
+  grid_map::GridMapRosConverter::fromMessage(message, elevationMap);
+  
+  traversabilityMap_.setElevationMap(message);
+  if (!traversabilityMap_.computeTraversability()) 
+    ROS_ERROR("[TraversabilityEstimation::gridMapToUpdateTraversabilityMapCallback]: "
+                "It was not possible to use received grid map message to update traversability map.");
+               
 }
 
 } /* namespace */
